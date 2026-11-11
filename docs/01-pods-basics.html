@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Pods - Basics | Study Guide</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+  .card-flip { perspective: 1000px; }
+  .card-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-front, .card-back { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .card-back { transform: rotateY(180deg); }
+  .reveal-btn { transition: all 0.3s ease; }
+  .hidden-answer { display: none; }
+  .copy-btn { transition: all 0.2s ease; }
+  pre { overflow-x: auto; }
+  .star-btn { transition: color 0.15s ease; }
+  .mermaid svg { max-width: 100%; }
+  @media print {
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+  }
+</style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO / TITLE SECTION
+═══════════════════════════════════════════════════════════ -->
+<section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 border-b border-slate-700">
+  <div class="absolute inset-0 opacity-10">
+    <div class="absolute top-10 left-10 w-72 h-72 bg-blue-500 rounded-full filter blur-3xl"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-cyan-500 rounded-full filter blur-3xl"></div>
+  </div>
+  <div class="relative max-w-5xl mx-auto px-6 py-16">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">CKA Prep</span>
+      <span class="bg-slate-700 text-slate-300 text-xs px-3 py-1 rounded-full">Module 01</span>
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-400 bg-clip-text text-transparent">
+      Kubernetes Pods
+    </h1>
+    <p class="text-slate-400 text-lg md:text-xl max-w-2xl mb-8">
+      The smallest deployable unit — master pods to master Kubernetes.
+    </p>
+
+    <!-- Confidence Meter -->
+    <div class="bg-slate-800/60 backdrop-blur border border-slate-700 rounded-2xl p-6 inline-block">
+      <p class="text-sm text-slate-400 mb-3 font-medium">How confident are you on this topic?</p>
+      <div class="flex gap-2 items-center">
+        <div class="flex gap-1" id="starContainer">
+          <!-- Stars injected by JS -->
+        </div>
+        <span id="confidenceLabel" class="ml-3 text-sm text-slate-400"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     KEY CONCEPTS CARDS
+═══════════════════════════════════════════════════════════ -->
+<section class="max-w-5xl mx-auto px-6 py-14">
+  <div class="flex items-center gap-3 mb-8">
+    <span class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-sm font-bold">1</span>
+    <h2 class="text-2xl font-bold text-slate-100">Key Concepts</h2>
+    <span class="text-slate-500 text-sm">(Click a card to reveal the explanation)</span>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="conceptsGrid">
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition-all group">
+      <div class="text-blue-400 text-xs font-semibold uppercase tracking-wider mb-2">Definition</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-blue-300 transition-colors">Pod</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        The smallest deployable unit in Kubernetes. A group of one or more containers that share network and storage resources. Each pod gets its own IP address.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 transition-all group">
+      <div class="text-cyan-400 text-xs font-semibold uppercase tracking-wider mb-2">Property</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">Ephemeral</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        Pods are not designed to run forever. They can be killed and replaced at any time. Never store persistent state inside a pod without a PersistentVolume.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-teal-500 hover:shadow-lg hover:shadow-teal-500/10 transition-all group">
+      <div class="text-teal-400 text-xs font-semibold uppercase tracking-wider mb-2">Creation</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-teal-300 transition-colors">Imperative vs Declarative</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        <strong class="text-teal-400">Imperative:</strong> <code class="bg-slate-900 px-1 rounded text-xs">kubectl run nginx --image=nginx</code> — fast for exams.<br><br>
+        <strong class="text-teal-400">Declarative:</strong> Apply a YAML file — preferred for production & reproducibility.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/10 transition-all group">
+      <div class="text-purple-400 text-xs font-semibold uppercase tracking-wider mb-2">Pattern</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-purple-300 transition-colors">Sidecar Pattern</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        A helper container that runs alongside the main container to extend or enhance it. Classic example: a log-shipping container that reads logs from a shared volume and forwards them to a central store.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 transition-all group">
+      <div class="text-orange-400 text-xs font-semibold uppercase tracking-wider mb-2">Pattern</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-orange-300 transition-colors">Ambassador Pattern</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        A proxy container that simplifies the main container's communication with the outside world. The main container talks to localhost; the ambassador handles routing/discovery externally.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+    <div class="concept-card bg-slate-800 border border-slate-700 rounded-xl p-5 cursor-pointer hover:border-pink-500 hover:shadow-lg hover:shadow-pink-500/10 transition-all group">
+      <div class="text-pink-400 text-xs font-semibold uppercase tracking-wider mb-2">Pattern</div>
+      <h3 class="text-lg font-bold text-slate-100 group-hover:text-pink-300 transition-colors">Adapter Pattern</h3>
+      <div class="hidden-answer mt-3 pt-3 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+        A container that transforms or standardizes output from the main container before it is consumed externally. Example: converting custom metrics format to Prometheus format.
+      </div>
+      <div class="reveal-hint mt-3 text-xs text-slate-600 group-hover:text-slate-500">Click to reveal →</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     VISUAL ARCHITECTURE
+═══════════════════════════════════════════════════════════ -->
+<section class="bg-slate-800/40 border-y border-slate-700">
+  <div class="max-w-5xl mx-auto px-6 py-14">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center text-sm font-bold">2</span>
+      <h2 class="text-2xl font-bold text-slate-100">Visual Architecture</h2>
+    </div>
+
+    <!-- Pod Lifecycle Diagram -->
+    <div class="mb-10">
+      <h3 class="text-lg font-semibold text-cyan-400 mb-4">Pod Lifecycle State Machine</h3>
+      <div class="bg-slate-900 rounded-xl p-6 border border-slate-700 overflow-x-auto">
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> Pending : Pod submitted to API Server
+    Pending --> Running : Containers start successfully
+    Pending --> Failed : Image pull error / scheduling failure
+    Running --> Succeeded : All containers exit with code 0
+    Running --> Failed : At least one container exits with error
+    Running --> Unknown : Node communication lost
+    Succeeded --> [*]
+    Failed --> [*]
+        </div>
+      </div>
+    </div>
+
+    <!-- Pod Anatomy Diagram -->
+    <div class="mb-10">
+      <h3 class="text-lg font-semibold text-blue-400 mb-4">Pod Anatomy</h3>
+      <div class="bg-slate-900 rounded-xl p-6 border border-slate-700 overflow-x-auto">
+        <div class="mermaid">
+graph TB
+    subgraph NODE["🖥️ Kubernetes Node"]
+      subgraph POD["📦 Pod  (shared IP, shared volumes)"]
+        C1["🟢 Main Container<br/>(nginx)"]
+        C2["🔵 Sidecar Container<br/>(log-shipper)"]
+        VOL["📁 Shared Volume<br/>/var/log"]
+        C1 -- writes logs --> VOL
+        C2 -- reads logs --> VOL
+      end
+    end
+    USER["👤 User / Service"] -- "Pod IP:80" --> C1
+    C2 -- "ships logs" --> LOGSTORE["☁️ Log Store"]
+    style POD fill:#1e3a5f,stroke:#3b82f6,color:#e2e8f0
+    style NODE fill:#1a2332,stroke:#475569,color:#e2e8f0
+    style C1 fill:#065f46,stroke:#10b981,color:#e2e8f0
+    style C2 fill:#1e3a5f,stroke:#60a5fa,color:#e2e8f0
+    style VOL fill:#3b1f5e,stroke:#a855f7,color:#e2e8f0
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-container patterns -->
+    <div>
+      <h3 class="text-lg font-semibold text-teal-400 mb-4">Multi-Container Patterns Comparison</h3>
+      <div class="bg-slate-900 rounded-xl p-6 border border-slate-700 overflow-x-auto">
+        <div class="mermaid">
+graph LR
+    subgraph SIDECAR["Sidecar Pattern"]
+      direction TB
+      S_MAIN["Main Container"] -- "shared vol" --> S_SIDE["Sidecar<br/>(enhances)"]
+    end
+    subgraph AMBASSADOR["Ambassador Pattern"]
+      direction TB
+      A_MAIN["Main Container"] -- "localhost" --> A_AMB["Ambassador<br/>(proxy)"]
+      A_AMB -- "routes to" --> A_EXT["External Service"]
+    end
+    subgraph ADAPTER["Adapter Pattern"]
+      direction TB
+      AD_MAIN["Main Container"] -- "raw output" --> AD_ADP["Adapter<br/>(transforms)"]
+      AD_ADP -- "standard format" --> AD_MON["Monitoring"]
+    end
+    style SIDECAR fill:#1a2e1a,stroke:#22c55e
+    style AMBASSADOR fill:#1a1a2e,stroke:#6366f1
+    style ADAPTER fill:#2e1a1a,stroke:#f97316
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     DEEP DIVE
+═══════════════════════════════════════════════════════════ -->
+<section class="max-w-5xl mx-auto px-6 py-14">
+  <div class="flex items-center gap-3 mb-8">
+    <span class="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center text-sm font-bold">3</span>
+    <h2 class="text-2xl font-bold text-slate-100">Deep Dive</h2>
+  </div>
+
+  <!-- What is a Pod -->
+  <div class="mb-10">
+    <h3 class="text-xl font-bold text-teal-400 mb-4 flex items-center gap-2">
+      <span>📦</span> What is a Pod?
+    </h3>
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 space-y-4">
+      <p class="text-slate-300 leading-relaxed">A <strong class="text-white">Pod</strong> is the atomic unit of scheduling in Kubernetes — you don't deploy containers directly, you deploy pods. Containers in the same pod share:</p>
+      <ul class="space-y-2">
+        <li class="flex items-center gap-3 text-slate-300"><span class="text-teal-400">●</span> The same <strong class="text-white">network namespace</strong> (same IP, can talk via localhost)</li>
+        <li class="flex items-center gap-3 text-slate-300"><span class="text-teal-400">●</span> The same <strong class="text-white">IPC namespace</strong> (can share memory)</li>
+        <li class="flex items-center gap-3 text-slate-300"><span class="text-teal-400">●</span> <strong class="text-white">Volumes</strong> mounted into the pod</li>
+      </ul>
+      <!-- Why callout -->
+      <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4 mt-4">
+        <div class="flex gap-2 items-start">
+          <span class="text-blue-400 text-lg">💡</span>
+          <div>
+            <p class="text-blue-300 font-semibold text-sm mb-1">Why does Kubernetes use Pods instead of raw containers?</p>
+            <p class="text-slate-400 text-sm">Pods allow tightly-coupled processes (like a web server + log shipper) to be co-located and share resources, while still being independently versioned containers. This keeps containers focused on a single responsibility.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pod Lifecycle -->
+  <div class="mb-10">
+    <h3 class="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
+      <span>🔄</span> Pod Lifecycle Phases
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div class="bg-slate-800 border border-yellow-700/50 rounded-xl p-4 flex gap-4 items-start">
+        <span class="bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-md min-w-fit">PENDING</span>
+        <p class="text-slate-400 text-sm">Pod accepted by the cluster, but containers not yet running. May be waiting for image pull or node scheduling.</p>
+      </div>
+      <div class="bg-slate-800 border border-green-700/50 rounded-xl p-4 flex gap-4 items-start">
+        <span class="bg-green-500 text-black text-xs font-bold px-2 py-1 rounded-md min-w-fit">RUNNING</span>
+        <p class="text-slate-400 text-sm">Pod bound to a node. At least one container is running, starting, or restarting.</p>
+      </div>
+      <div class="bg-slate-800 border border-blue-700/50 rounded-xl p-4 flex gap-4 items-start">
+        <span class="bg-blue-500 text-black text-xs font-bold px-2 py-1 rounded-md min-w-fit">SUCCEEDED</span>
+        <p class="text-slate-400 text-sm">All containers terminated with exit code 0 and will not be restarted. Common for batch Jobs.</p>
+      </div>
+      <div class="bg-slate-800 border border-red-700/50 rounded-xl p-4 flex gap-4 items-start">
+        <span class="bg-red-500 text-black text-xs font-bold px-2 py-1 rounded-md min-w-fit">FAILED</span>
+        <p class="text-slate-400 text-sm">At least one container terminated with a non-zero exit code, or the system terminated the container.</p>
+      </div>
+      <div class="bg-slate-800 border border-slate-600/50 rounded-xl p-4 flex gap-4 items-start md:col-span-2">
+        <span class="bg-slate-500 text-black text-xs font-bold px-2 py-1 rounded-md min-w-fit">UNKNOWN</span>
+        <p class="text-slate-400 text-sm">Cannot determine pod state — typically because the node has lost communication with the control plane.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Creating Pods -->
+  <div class="mb-10">
+    <h3 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2">
+      <span>🛠️</span> Creating Pods
+    </h3>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4">
+      <button onclick="showTab('imperative')" id="tab-imperative" class="tab-btn bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">⚡ Imperative</button>
+      <button onclick="showTab('declarative')" id="tab-declarative" class="tab-btn bg-slate-700 text-slate-300 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-slate-600">📄 Declarative (YAML)</button>
+    </div>
+
+    <div id="tab-content-imperative" class="tab-content">
+      <div class="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+          <span class="text-xs text-slate-400 font-mono">bash</span>
+          <button onclick="copyCode('code-imperative')" class="copy-btn text-xs text-slate-500 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded">Copy</button>
+        </div>
+        <pre class="p-4 text-sm text-green-300 overflow-x-auto" id="code-imperative">kubectl run nginx --image=nginx --port=80</pre>
+      </div>
+      <div class="mt-3 bg-amber-900/20 border border-amber-700/40 rounded-lg p-4">
+        <p class="text-amber-300 text-sm"><span class="font-bold">🎯 CKA Tip:</span> The imperative command is fastest during exams. Add <code class="bg-slate-800 px-1 rounded text-xs">--dry-run=client -o yaml</code> to generate YAML you can then edit!</p>
+        <div class="mt-2 bg-slate-900 rounded p-3 font-mono text-xs text-green-300">kubectl run nginx --image=nginx --dry-run=client -o yaml > pod.yaml</div>
+      </div>
+    </div>
+
+    <div id="tab-content-declarative" class="tab-content hidden">
+      <div class="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+          <span class="text-xs text-slate-400 font-mono">pod.yaml</span>
+          <button onclick="copyCode('code-declarative')" class="copy-btn text-xs text-slate-500 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded">Copy</button>
+        </div>
+        <pre class="p-4 text-sm overflow-x-auto" id="code-declarative"><span class="text-blue-400">apiVersion</span><span class="text-slate-300">: </span><span class="text-green-400">v1</span>
+<span class="text-blue-400">kind</span><span class="text-slate-300">: </span><span class="text-green-400">Pod</span>
+<span class="text-blue-400">metadata</span><span class="text-slate-300">:</span>
+  <span class="text-blue-400">name</span><span class="text-slate-300">: </span><span class="text-green-400">nginx-pod</span>
+  <span class="text-blue-400">labels</span><span class="text-slate-300">:</span>
+    <span class="text-blue-400">app</span><span class="text-slate-300">: </span><span class="text-green-400">nginx</span>
+<span class="text-blue-400">spec</span><span class="text-slate-300">:</span>
+  <span class="text-blue-400">containers</span><span class="text-slate-300">:</span>
+  <span class="text-slate-300">- </span><span class="text-blue-400">name</span><span class="text-slate-300">: </span><span class="text-green-400">nginx</span>
+    <span class="text-blue-400">image</span><span class="text-slate-300">: </span><span class="text-green-400">nginx:1.25</span>
+    <span class="text-blue-400">ports</span><span class="text-slate-300">:</span>
+    <span class="text-slate-300">- </span><span class="text-blue-400">containerPort</span><span class="text-slate-300">: </span><span class="text-orange-400">80</span></pre>
+      </div>
+      <div class="mt-3 bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
+          <span class="text-xs text-slate-400 font-mono">bash — apply the YAML</span>
+          <button onclick="copyCode('code-apply')" class="copy-btn text-xs text-slate-500 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded">Copy</button>
+        </div>
+        <pre class="p-4 text-sm text-green-300" id="code-apply">kubectl apply -f pod.yaml</pre>
+      </div>
+      <div class="mt-3 bg-blue-900/20 border border-blue-700/40 rounded-lg p-4">
+        <p class="text-blue-300 text-sm"><span class="font-bold">📌 Note:</span> The 4 required YAML fields are <code class="bg-slate-800 px-1 rounded text-xs">apiVersion</code>, <code class="bg-slate-800 px-1 rounded text-xs">kind</code>, <code class="bg-slate-800 px-1 rounded text-xs">metadata</code>, and <code class="bg-slate-800 px-1 rounded text-xs">spec</code>. Forgetting any of these will cause a validation error.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Troubleshooting -->
+  <div class="mb-10">
+    <h3 class="text-xl font-bold text-orange-400 mb-4 flex items-center gap-2">
+      <span>🔍</span> Troubleshooting Pods
+    </h3>
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+      <p class="text-slate-400 mb-4 text-sm">Follow this mental model when a pod isn't behaving correctly:</p>
+      <div class="space-y-3">
+        <div class="flex gap-3 items-start">
+          <span class="bg-orange-500 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center min-w-fit">1</span>
+          <div>
+            <code class="text-orange-300 text-sm">kubectl get pods</code>
+            <p class="text-slate-500 text-xs mt-1">Check STATUS and RESTARTS columns. High restarts = crash loop.</p>
+          </div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="bg-orange-500 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center min-w-fit">2</span>
+          <div>
+            <code class="text-orange-300 text-sm">kubectl describe pod &lt;name&gt;</code>
+            <p class="text-slate-500 text-xs mt-1">Look at the Events section at the bottom for scheduling and image pull errors.</p>
+          </div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="bg-orange-500 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center min-w-fit">3</span>
+          <div>
+            <code class="text-orange-300 text-sm">kubectl logs &lt;pod-name&gt;</code>
+            <p class="text-slate-500 text-xs mt-1">Application-level errors. Add <code>--previous</code> to see logs from a crashed container.</p>
+          </div>
+        </div>
+        <div class="flex gap-3 items-start">
+          <span class="bg-orange-500 text-black text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center min-w-fit">4</span>
+          <div>
+            <code class="text-orange-300 text-sm">kubectl exec -it &lt;pod-name&gt; -- /bin/bash</code>
+            <p class="text-slate-500 text-xs mt-1">Get a shell inside to inspect environment, network connectivity, file contents.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PRACTICE QUESTIONS
+═══════════════════════════════════════════════════════════ -->
+<section class="bg-slate-800/40 border-y border-slate-700">
+  <div class="max-w-5xl mx-auto px-6 py-14">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-sm font-bold">4</span>
+      <h2 class="text-2xl font-bold text-slate-100">Practice Questions</h2>
+    </div>
+
+    <!-- Multiple Choice -->
+    <h3 class="text-lg font-semibold text-purple-400 mb-4">Multiple Choice</h3>
+    <div class="space-y-6 mb-10">
+
+      <!-- Q1 -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-4">1. Which pod phase indicates that ALL containers in a pod have terminated with exit code 0?</p>
+        <div class="space-y-2" id="q1-options">
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q1" value="a" class="text-purple-500"> <span class="text-slate-300">A. Running</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q1" value="b" class="text-purple-500"> <span class="text-slate-300">B. Completed</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q1" value="c" class="text-purple-500"> <span class="text-slate-300">C. Succeeded</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q1" value="d" class="text-purple-500"> <span class="text-slate-300">D. Terminated</span>
+          </label>
+        </div>
+        <button onclick="checkMC('q1','c', this)" class="mt-4 bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">Check Answer</button>
+        <div id="q1-feedback" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-4">2. Which command generates a pod YAML without actually creating the pod (useful in CKA)?</p>
+        <div class="space-y-2">
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q2" value="a"> <span class="text-slate-300 font-mono text-sm">A. kubectl run nginx --image=nginx --yaml</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q2" value="b"> <span class="text-slate-300 font-mono text-sm">B. kubectl run nginx --image=nginx --dry-run=client -o yaml</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q2" value="c"> <span class="text-slate-300 font-mono text-sm">C. kubectl create pod nginx --image=nginx --output=yaml</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q2" value="d"> <span class="text-slate-300 font-mono text-sm">D. kubectl describe pod nginx -o yaml</span>
+          </label>
+        </div>
+        <button onclick="checkMC('q2','b', this)" class="mt-4 bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">Check Answer</button>
+        <div id="q2-feedback" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-4">3. You have a multi-container pod. How do you view logs only for the container named "sidecar"?</p>
+        <div class="space-y-2">
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q3" value="a"> <span class="text-slate-300 font-mono text-sm">A. kubectl logs my-pod --name=sidecar</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q3" value="b"> <span class="text-slate-300 font-mono text-sm">B. kubectl logs my-pod -c sidecar</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q3" value="c"> <span class="text-slate-300 font-mono text-sm">C. kubectl logs my-pod/sidecar</span>
+          </label>
+          <label class="mc-option flex items-center gap-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:border-slate-500 transition-all">
+            <input type="radio" name="q3" value="d"> <span class="text-slate-300 font-mono text-sm">D. kubectl logs --container sidecar</span>
+          </label>
+        </div>
+        <button onclick="checkMC('q3','b', this)" class="mt-4 bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">Check Answer</button>
+        <div id="q3-feedback" class="hidden mt-3 p-3 rounded-lg text-sm"></div>
+      </div>
+
+    </div>
+
+    <!-- Short Answer -->
+    <h3 class="text-lg font-semibold text-cyan-400 mb-4">Short Answer — Reveal</h3>
+    <div class="space-y-4">
+
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-2">❓ Why are pods considered "ephemeral" and what does that mean for data storage?</p>
+        <button class="reveal-btn mt-2 text-sm bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-all" onclick="revealAnswer(this)">Reveal Answer</button>
+        <div class="hidden-answer mt-4 p-4 bg-slate-900 rounded-lg border border-cyan-700/40 text-slate-300 text-sm leading-relaxed">
+          Ephemeral means pods can be killed, rescheduled, or replaced at any time. Any data written inside a container's filesystem is lost when the pod dies. For persistent data, you must use <strong class="text-cyan-400">PersistentVolumes (PV)</strong> and <strong class="text-cyan-400">PersistentVolumeClaims (PVC)</strong> which exist independently of the pod lifecycle.
+        </div>
+      </div>
+
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-2">❓ What is the difference between the Ambassador and Adapter multi-container patterns?</p>
+        <button class="reveal-btn mt-2 text-sm bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-all" onclick="revealAnswer(this)">Reveal Answer</button>
+        <div class="hidden-answer mt-4 p-4 bg-slate-900 rounded-lg border border-cyan-700/40 text-slate-300 text-sm leading-relaxed">
+          <strong class="text-orange-400">Ambassador</strong> focuses on <em>outbound communication</em> — it proxies requests from the main container to external services, abstracting away discovery/routing.<br><br>
+          <strong class="text-pink-400">Adapter</strong> focuses on <em>output transformation</em> — it takes the main container's output and converts it to a standard format for external consumers (e.g., Prometheus metrics).
+        </div>
+      </div>
+
+      <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <p class="font-semibold text-slate-100 mb-2">❓ A pod is in "Unknown" state. What is the most likely cause?</p>
+        <button class="reveal-btn mt-2 text-sm bg-cyan-700 hover:bg-cyan-600 text-white px-4 py-2 rounded-lg transition-all" onclick="revealAnswer(this)">Reveal Answer</button>
+        <div class="hidden-answer mt-4 p-4 bg-slate-900 rounded-lg border border-cyan-700/40 text-slate-300 text-sm leading-relaxed">
+          The <strong class="text-white">node where the pod is running has lost communication with the Kubernetes control plane</strong> (API server cannot reach the kubelet on that node). Check node health with <code class="bg-slate-800 px-1 rounded text-xs">kubectl get nodes</code> and look for <code>NotReady</code> status.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FLASHCARDS
+═══════════════════════════════════════════════════════════ -->
+<section class="max-w-5xl mx-auto px-6 py-14">
+  <div class="flex items-center gap-3 mb-8">
+    <span class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-sm font-bold">5</span>
+    <h2 class="text-2xl font-bold text-slate-100">Flashcards</h2>
+    <span class="text-slate-500 text-sm">(Click card to flip)</span>
+  </div>
+
+  <div class="max-w-2xl mx-auto">
+    <!-- Progress -->
+    <div class="flex items-center justify-between mb-4">
+      <span id="fc-counter" class="text-slate-400 text-sm">Card 1 of 10</span>
+      <div class="flex gap-2">
+        <span class="text-green-400 text-sm" id="fc-got-count">✓ 0 got it</span>
+        <span class="text-red-400 text-sm" id="fc-review-count">↺ 0 review</span>
+      </div>
+    </div>
+
+    <!-- Card -->
+    <div class="card-flip w-full h-64 cursor-pointer mb-6" onclick="flipCard()">
+      <div class="card-inner relative w-full h-full" id="cardInner">
+        <div class="card-front absolute inset-0 bg-slate-800 border-2 border-slate-600 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+          <span class="text-slate-500 text-xs uppercase tracking-widest mb-4">Term</span>
+          <p class="text-2xl font-bold text-slate-100" id="fc-term">Loading...</p>
+          <p class="text-slate-600 text-xs mt-6">Click to reveal definition</p>
+        </div>
+        <div class="card-back absolute inset-0 bg-gradient-to-br from-blue-900 to-slate-800 border-2 border-blue-500 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
+          <span class="text-blue-400 text-xs uppercase tracking-widest mb-4">Definition</span>
+          <p class="text-slate-200 text-lg leading-relaxed" id="fc-def">Definition here</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex gap-3 justify-center mb-4">
+      <button onclick="fcGotIt()" class="bg-green-700 hover:bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all">✓ Got it</button>
+      <button onclick="fcReview()" class="bg-red-800 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all">↺ Review again</button>
+    </div>
+    <div class="flex gap-3 justify-center">
+      <button onclick="fcPrev()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all">← Previous</button>
+      <button onclick="fcNext()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg text-sm transition-all">Next →</button>
+    </div>
+
+    <!-- Mini progress bar -->
+    <div class="mt-6 h-2 bg-slate-700 rounded-full overflow-hidden">
+      <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500" id="fc-progress-bar" style="width: 10%"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COMMAND REFERENCE
+═══════════════════════════════════════════════════════════ -->
+<section class="bg-slate-800/40 border-y border-slate-700">
+  <div class="max-w-5xl mx-auto px-6 py-14">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-sm font-bold">6</span>
+      <h2 class="text-2xl font-bold text-slate-100">Command Reference</h2>
+    </div>
+
+    <div class="bg-slate-900 rounded-xl border border-slate-700 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-800 border-b border-slate-700">
+              <th class="text-left px-4 py-3 text-slate-400 font-semibold w-1/2">Command</th>
+              <th class="text-left px-4 py-3 text-slate-400 font-semibold">Description</th>
+              <th class="px-4 py-3 text-slate-400 font-semibold w-16">Copy</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl get pods</td>
+              <td class="px-4 py-3 text-slate-400">List all pods in current namespace</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl get pods')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl get pods -o wide</td>
+              <td class="px-4 py-3 text-slate-400">List pods with IP address and node info</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl get pods -o wide')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl describe pod &lt;name&gt;</td>
+              <td class="px-4 py-3 text-slate-400">Show detailed info + events for a pod</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl describe pod ')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl logs &lt;pod-name&gt;</td>
+              <td class="px-4 py-3 text-slate-400">View stdout logs from the pod</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl logs ')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl logs &lt;pod&gt; -c &lt;container&gt;</td>
+              <td class="px-4 py-3 text-slate-400">Logs for a specific container in multi-container pod</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl logs  -c ')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl logs &lt;pod&gt; --previous</td>
+              <td class="px-4 py-3 text-slate-400">Logs from the previously terminated container</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl logs  --previous')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl exec -it &lt;pod&gt; -- /bin/bash</td>
+              <td class="px-4 py-3 text-slate-400">Open an interactive shell in a pod</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl exec -it  -- /bin/bash')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl delete pod &lt;name&gt;</td>
+              <td class="px-4 py-3 text-slate-400">Delete a pod</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl delete pod ')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl run nginx --image=nginx --dry-run=client -o yaml</td>
+              <td class="px-4 py-3 text-slate-400">Generate pod YAML without creating it (CKA trick)</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl run nginx --image=nginx --dry-run=client -o yaml')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+            <tr class="hover:bg-slate-800/50 transition-colors">
+              <td class="px-4 py-3 font-mono text-green-300 text-xs">kubectl apply -f pod.yaml</td>
+              <td class="px-4 py-3 text-slate-400">Create or update resources from a YAML file</td>
+              <td class="px-4 py-3"><button onclick="copyText('kubectl apply -f pod.yaml')" class="copy-btn text-slate-500 hover:text-white text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition-all">Copy</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHEAT SHEET
+═══════════════════════════════════════════════════════════ -->
+<section class="max-w-5xl mx-auto px-6 py-14">
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-3">
+      <span class="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center text-sm font-bold">7</span>
+      <h2 class="text-2xl font-bold text-slate-100">Cheat Sheet</h2>
+    </div>
+    <button onclick="window.print()" class="no-print text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded-lg transition-all flex items-center gap-2">
+      🖨️ Print
+    </button>
+  </div>
+
+  <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-700">
+
+      <!-- Left column -->
+      <div class="p-6 space-y-6">
+        <div>
+          <h4 class="text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">Pod Fundamentals</h4>
+          <table class="w-full text-sm">
+            <tbody class="space-y-1">
+              <tr class="border-b border-slate-700/50">
+                <td class="py-2 text-slate-400 pr-4">Unit type</td>
+                <td class="py-2 text-slate-200 font-medium">Smallest deployable unit</td>
+              </tr>
+              <tr class="border-b border-slate-700/50">
+                <td class="py-2 text-slate-400 pr-4">Persistence</td>
+                <td class="py-2 text-slate-200 font-medium">Ephemeral (not permanent)</td>
+              </tr>
+              <tr class="border-b border-slate-700/50">
+                <td class="py-2 text-slate-400 pr-4">Network</td>
+                <td class="py-2 text-slate-200 font-medium">1 unique IP per pod</td>
+              </tr>
+              <tr>
+                <td class="py-2 text-slate-400 pr-4">Shared</td>
+                <td class="py-2 text-slate-200 font-medium">Network, IPC, Volumes</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h4 class="text-green-400 font-bold text-sm uppercase tracking-wider mb-3">Lifecycle Phases</h4>
+          <div class="space-y-1 text-sm">
+            <div class="flex items-center gap-2"><span class="w-20 text-yellow-400 font-mono">Pending</span><span class="text-slate-400">Accepted, not yet running</span></div>
+            <div class="flex items-center gap-2"><span class="w-20 text-green-400 font-mono">Running</span><span class="text-slate-400">≥1 container running</span></div>
+            <div class="flex items-center gap-2"><span class="w-20 text-blue-400 font-mono">Succeeded</span><span class="text-slate-400">All exited with code 0</span></div>
+            <div class="flex items-center gap-2"><span class="w-20 text-red-400 font-mono">Failed</span><span class="text-slate-400">≥1 exited with error</span></div>
+            <div class="flex items-center gap-2"><span class="w-20 text-slate-400 font-mono">Unknown</span><span class="text-slate-400">Node comms lost</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="p-6 space-y-6">
+        <div>
+          <h4 class="text-purple-400 font-bold text-sm uppercase tracking-wider mb-3">Multi-Container Patterns</h4>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-700">
+                <th class="text-left py-2 text-slate-500 font-medium">Pattern</th>
+                <th class="text-left py-2 text-slate-500 font-medium">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-slate-700/50">
+                <td class="py-2 text-green-400 font-medium pr-4">Sidecar</td>
+                <td class="py-2 text-slate-400">Enhances main container</td>
+              </tr>
+              <tr class="border-b border-slate-700/50">
+                <td class="py-2 text-indigo-400 font-medium pr-4">Ambassador</td>
+                <td class="py-2 text-slate-400">Proxies external comms</td>
+              </tr>
+              <tr>
+                <td class="py-2 text-orange-400 font-medium pr-4">Adapter</td>
+                <td class="py-2 text-slate-400">Transforms output format</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h4 class="text-orange-400 font-bold text-sm uppercase tracking-wider mb-3">Required YAML Fields</h4>
+          <div class="space-y-1 text-sm font-mono">
+            <div class="flex items-center gap-2"><span class="text-blue-400">apiVersion:</span><span class="text-slate-400">v1</span></div>
+            <div class="flex items-center gap-2"><span class="text-blue-400">kind:</span><span class="text-slate-400">Pod</span></div>
+            <div class="flex items-center gap-2"><span class="text-blue-400">metadata:</span><span class="text-slate-400">name, labels</span></div>
+            <div class="flex items-center gap-2"><span class="text-blue-400">spec:</span><span class="text-slate-400">containers[]</span></div>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-cyan-400 font-bold text-sm uppercase tracking-wider mb-3">CKA Must-Knows</h4>
+          <ul class="text-sm space-y-1 text-slate-400">
+            <li>✓ Imperative pod creation speed</li>

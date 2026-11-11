@@ -117,7 +117,7 @@ def transform_note(client: anthropic.Anthropic, note_path: Path, cache: dict) ->
     # Use streaming for large outputs to avoid timeouts
     collected_html = []
     with client.messages.stream(
-        model="claude-sonnet-4-5",
+        model="claude-sonnet-4-6",
         max_tokens=16000,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_message}],
@@ -228,9 +228,23 @@ def main():
     )
     args = parser.parse_args()
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("NOT3D_API_KEY")
+
+    # Also try loading from .env file if env var not set
     if not api_key:
-        print("Error: ANTHROPIC_API_KEY environment variable is not set.")
+        env_file = Path(".env")
+        if env_file.exists():
+            for line in env_file.read_text().strip().splitlines():
+                if "=" in line:
+                    key, _, value = line.partition("=")
+                    if key.strip() == "NOT3D_API_KEY":
+                        api_key = value.strip()
+                else:
+                    # Raw key with no KEY= prefix
+                    api_key = line.strip()
+
+    if not api_key:
+        print("Error: NOT3D_API_KEY not found in environment or .env file.")
         sys.exit(1)
 
     client = anthropic.Anthropic(api_key=api_key)
